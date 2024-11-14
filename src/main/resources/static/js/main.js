@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // トーストコンテナの作成
     createToastContainer();
+    
+    // フィルターボタンの初期化
+    initializePriorityFilter();
 });
 
 // トーストコンテナの作成
@@ -76,6 +79,8 @@ async function updateTaskStatus(taskId, newStatus) {
     }
 }
 
+
+
 // タスク削除
 async function deleteTask(taskId) {
     if (!confirm('このタスクを削除してもよろしいですか？')) {
@@ -103,10 +108,14 @@ async function deleteTask(taskId) {
     }
 }
 
+
+
 // ポモドーロタイマー開始
 function startPomodoro(taskId) {
     window.location.href = `/pomodoro/${taskId}`;
 }
+
+
 
 // タグ管理機能
 function initializeTagManagement() {
@@ -138,6 +147,8 @@ function initializeTagManagement() {
     }
 }
 
+
+
 // タグ削除
 async function deleteTag(tagId) {
     if (!confirm('このタグを削除してもよろしいですか？')) {
@@ -162,6 +173,8 @@ async function deleteTag(tagId) {
         showToast('エラーが発生しました', 'danger');
     }
 }
+
+
 
 // トースト通知の表示
 function showToast(message, type = 'info') {
@@ -190,6 +203,8 @@ function showToast(message, type = 'info') {
         toast.remove();
     });
 }
+
+
 
 document.addEventListener('DOMContentLoaded', function() {
     // 削除確認モーダルの設定
@@ -261,3 +276,71 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 });
+
+
+function initializePriorityFilter() {
+    const filterButtons = document.querySelectorAll('[data-priority]');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // アクティブなボタンのスタイルを更新
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            const selectedPriority = this.dataset.priority;
+            filterTasksByPriority(selectedPriority);
+        });
+    });
+}
+
+function filterTasksByPriority(priority) {
+    const taskCards = document.querySelectorAll('.task-card');
+    
+    taskCards.forEach(card => {
+        if (priority === 'ALL') {
+            card.style.display = '';
+            // フェードインアニメーション
+            card.style.opacity = '0';
+            setTimeout(() => {
+                card.style.opacity = '1';
+            }, 50);
+        } else {
+            const cardPriority = card.classList.contains(`priority-${priority}`);
+            if (cardPriority) {
+                card.style.display = '';
+                // フェードインアニメーション
+                card.style.opacity = '0';
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                }, 50);
+            } else {
+                card.style.display = 'none';
+            }
+        }
+    });
+
+    // 空の列のメッセージ表示を更新
+    updateEmptyStateMessages();
+}
+
+function updateEmptyStateMessages() {
+    const taskLists = document.querySelectorAll('.task-list');
+    
+    taskLists.forEach(list => {
+        const visibleTasks = list.querySelectorAll('.task-card[style="display: "]').length;
+        const emptyMessage = list.querySelector('.empty-state');
+        
+        if (visibleTasks === 0) {
+            if (!emptyMessage) {
+                const message = document.createElement('div');
+                message.className = 'empty-state text-center text-muted py-3';
+                message.innerHTML = 'タスクがありません';
+                list.appendChild(message);
+            }
+        } else {
+            if (emptyMessage) {
+                emptyMessage.remove();
+            }
+        }
+    });
+}

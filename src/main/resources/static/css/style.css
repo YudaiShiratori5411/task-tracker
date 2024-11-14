@@ -132,6 +132,43 @@
 
 
 
+/* Priority Filter Styles */
+.btn-group[role="group"] {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.btn-group .btn {
+    transition: all 0.2s ease;
+    margin-left: 0.1px !important;
+}
+.btn-group .btn:first-child {
+    margin-left: 0;
+    border-top-left-radius: 0.25rem;
+    border-bottom-left-radius: 0.25rem;
+}
+
+.btn-group .btn.active {
+    transform: scale(1.05);
+    font-weight: bold;
+}
+
+/* タスクカードのトランジション */
+.task-card {
+    transition: opacity 0.3s ease;
+}
+
+/* 空の状態のメッセージ */
+.empty-state {
+    border: 2px dashed #dee2e6;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    margin: 0.5rem 0;
+}
+
+
+
 
 
 
