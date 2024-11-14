@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: html}">
+<body>
+    <div th:fragment="content">
+        <div class="pomodoro-container text-center">
+            <div class="task-info mb-4">
+                <h3 th:text="${task.title}">タスク名</h3>
+                <p th:text="${task.description}" class="text-muted">タスクの説明</p>
+            </div>
+            
+            <div class="timer-display">
+                <div class="timer-circle">
+                    <div class="time" id="timeDisplay">25:00</div>
+                </div>
+            </div>
+            
+            <div class="timer-controls mt-4">
+                <button id="startButton" class="btn btn-primary btn-lg">
+                    <i class="fas fa-play"></i> 開始
+                </button>
+                <button id="pauseButton" class="btn btn-warning btn-lg" style="display: none;">
+                    <i class="fas fa-pause"></i> 一時停止
+                </button>
+                <button id="resetButton" class="btn btn-secondary btn-lg" disabled>
+                    <i class="fas fa-redo"></i> リセット
+                </button>
+            </div>
+            
+            <div class="session-info mt-4">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5>本日の集中セッション</h5>
+                                <h2 th:text="${todaysSessions}">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5>総集中時間</h5>
+                                <h2 th:text="${totalFocusTime + '分'}">0分</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5>現在のストリーク</h5>
+                                <h2><span id="streak">0</span>日</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

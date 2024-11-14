@@ -1,0 +1,138 @@
+.task-card {
+    transition: transform 0.2s ease;
+}
+
+.task-card:hover {
+    transform: translateY(-2px);
+}
+
+.task-meta {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.card-header {
+    font-weight: bold;
+}
+
+.task-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+
+
+
+/* ドラッグ&ドロップ関連のスタイル */
+.task-list {
+    min-height: 100px;
+    padding: 10px;
+    transition: background-color 0.2s ease;
+}
+.task-list.sortable-drag-enabled {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+.task-card {
+    cursor: grab;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.task-card:active {
+    cursor: grabbing;
+}
+.task-dragging {
+    opacity: 0.8;
+    transform: scale(0.95);
+}
+.task-ghost {
+    opacity: 0.4;
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+}
+/* ドラッグ可能な領域をハイライト */
+.task-list.sortable-ghost {
+    background-color: #e9ecef;
+    border-radius: 0.25rem;
+}
+/* タスクカードのホバー効果 */
+.task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* 優先度による色分け */
+.task-card.priority-HIGH .card {
+    border-left: 4px solid #dc3545;  /* 赤 - 高優先度 */
+}
+.task-card.priority-MEDIUM .card {
+    border-left: 4px solid #ffc107;  /* 黄 - 中優先度 */
+}
+.task-card.priority-LOW .card {
+    border-left: 4px solid #6c757d;  /* グレー - 低優先度 */
+}
+/* 優先度バッジのスタイル */
+.priority-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-weight: normal;
+}
+.priority-badge.priority-HIGH {
+    background-color: #dc3545;
+    color: white;
+}
+.priority-badge.priority-MEDIUM {
+    background-color: #ffc107;
+    color: black;
+}
+.priority-badge.priority-LOW {
+    background-color: #6c757d;
+    color: white;
+}
+/* カードヘッダーのレイアウト調整 */
+.task-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: transparent;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+}
+/* ホバー効果の強化 */
+.task-card:hover .card {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* フォームの優先度選択オプションのスタイル */
+.priority-option-HIGH {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.priority-option-MEDIUM {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.priority-option-LOW {
+    color: #6c757d;
+}
+
+
+
+
+
+
+
+

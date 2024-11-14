@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: html}">
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>タスク管理</h2>
+            <a th:href="@{/tasks/create}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> 新規タスク
+            </a>
+        </div>
+
+        <!-- タスクボード -->
+        <div class="row">
+            <!-- TODO列 -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                        <span>実行予定</span>
+                        <span class="badge bg-white text-info" 
+                              th:text="${#lists.size(tasks.?[status.name() == 'TODO'])}">0</span>
+                    </div>
+                    <div class="card-body task-list" data-status="TODO">
+                        <!-- TODOタスク -->
+                        <div th:each="task : ${tasks}"
+                             th:if="${task.status != null && task.status.name() == 'TODO'}"
+                             class="task-card mb-3"
+                             th:classappend="${'priority-' + task.priority}"
+                             th:id="${'task-' + task.id}"
+                             th:attr="data-task-id=${task.id}">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="card-title mb-0" th:text="${task.title}">タスクタイトル</h5>
+                                        <span class="priority-badge" 
+                                              th:classappend="${'priority-' + task.priority}"
+                                              th:text="${task.priority.displayName}">優先度</span>
+                                    </div>
+                                    <p class="card-text" th:if="${task.description}" th:text="${task.description}">説明</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="task-meta text-muted" th:if="${task.deadline}">
+                                            <i class="far fa-clock"></i>
+                                            <span th:text="${#temporals.format(task.deadline, 'yyyy/MM/dd HH:mm')}">期限</span>
+                                        </div>
+                                    </div>
+                                    <div class="task-actions mt-2">
+                                        <a th:href="@{/tasks/edit/{id}(id=${task.id})}" class="btn btn-sm btn-outline-primary me-2">
+                                            <i class="fas fa-edit"></i> 編集
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-danger"
+                                                th:onclick="'deleteTask(' + ${task.id} + ')'">
+                                            <i class="fas fa-trash"></i> 削除
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 進行中列 -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
+                        <span>進行中</span>
+                        <span class="badge bg-white text-warning" 
+                              th:text="${#lists.size(tasks.?[status.name() == 'IN_PROGRESS'])}">0</span>
+                    </div>
+                    <div class="card-body task-list" data-status="IN_PROGRESS">
+                        <!-- 進行中タスク -->
+                        <div th:each="task : ${tasks}"
+                             th:if="${task.status != null && task.status.name() == 'IN_PROGRESS'}"
+                             class="task-card mb-3"
+                             th:classappend="${'priority-' + task.priority}"
+                             th:id="${'task-' + task.id}"
+                             th:attr="data-task-id=${task.id}">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="card-title mb-0" th:text="${task.title}">タスクタイトル</h5>
+                                        <span class="priority-badge" 
+                                              th:classappend="${'priority-' + task.priority}"
+                                              th:text="${task.priority.displayName}">優先度</span>
+                                    </div>
+                                    <p class="card-text" th:if="${task.description}" th:text="${task.description}">説明</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="task-meta text-muted" th:if="${task.deadline}">
+                                            <i class="far fa-clock"></i>
+                                            <span th:text="${#temporals.format(task.deadline, 'yyyy/MM/dd HH:mm')}">期限</span>
+                                        </div>
+                                    </div>
+                                    <div class="task-actions mt-2">
+                                        <a th:href="@{/tasks/edit/{id}(id=${task.id})}" class="btn btn-sm btn-outline-primary me-2">
+                                            <i class="fas fa-edit"></i> 編集
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-danger"
+                                                th:onclick="'deleteTask(' + ${task.id} + ')'">
+                                            <i class="fas fa-trash"></i> 削除
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 完了列 -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <span>完了</span>
+                        <span class="badge bg-white text-success" 
+                              th:text="${#lists.size(tasks.?[status.name() == 'DONE'])}">0</span>
+                    </div>
+                    <div class="card-body task-list" data-status="DONE">
+                        <!-- 完了タスク -->
+                        <div th:each="task : ${tasks}"
+                             th:if="${task.status != null && task.status.name() == 'DONE'}"
+                             class="task-card mb-3"
+                             th:classappend="${'priority-' + task.priority}"
+                             th:id="${'task-' + task.id}"
+                             th:attr="data-task-id=${task.id}">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="card-title mb-0" th:text="${task.title}">タスクタイトル</h5>
+                                        <span class="priority-badge" 
+                                              th:classappend="${'priority-' + task.priority}"
+                                              th:text="${task.priority.displayName}">優先度</span>
+                                    </div>
+                                    <p class="card-text" th:if="${task.description}" th:text="${task.description}">説明</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="task-meta text-muted" th:if="${task.deadline}">
+                                            <i class="far fa-clock"></i>
+                                            <span th:text="${#temporals.format(task.deadline, 'yyyy/MM/dd HH:mm')}">期限</span>
+                                        </div>
+                                    </div>
+                                    <div class="task-actions mt-2">
+                                        <button class="btn btn-sm btn-outline-danger"
+                                                th:onclick="'deleteTask(' + ${task.id} + ')'">
+                                            <i class="fas fa-trash"></i> 削除
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 削除確認モーダル -->
+        <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">タスクの削除</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        このタスクを削除してもよろしいですか？
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                        <button type="button" class="btn btn-danger" id="confirmDelete">削除</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- トースト通知用コンテナ -->
+        <div id="toastContainer" class="position-fixed bottom-0 end-0 p-3"></div>
+    </div>
+</body>
+</html>

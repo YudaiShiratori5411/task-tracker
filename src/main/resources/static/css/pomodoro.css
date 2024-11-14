@@ -1,0 +1,69 @@
+.pomodoro-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.timer-display {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin: 0 auto;
+}
+
+.timer-circle {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.time {
+    font-size: 3.5rem;
+    font-weight: bold;
+    font-family: monospace;
+}
+
+.timer-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.timer-controls button {
+    min-width: 120px;
+}
+
+.session-info .card {
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.session-info .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.session-info h2 {
+    color: #28a745;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .timer-display {
+        width: 250px;
+        height: 250px;
+    }
+    
+    .time {
+        font-size: 2.5rem;
+    }
+    
+    .session-info .card {
+        margin-bottom: 1rem;
+    }
+}

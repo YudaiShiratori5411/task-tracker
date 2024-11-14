@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: html}">
+<head>
+    <title>タスク管理</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="card">
+            <div class="card-header">
+                <h3 th:text="${task.id == null ? 'タスクの新規作成' : 'タスクの編集'}">タスクの新規作成</h3>
+            </div>
+            <div class="card-body">
+                <form th:action="@{${task.id == null ? '/tasks' : '/tasks/edit/' + task.id}}"
+                      th:object="${task}"
+                      method="post"
+                      class="needs-validation"
+                      novalidate>
+                    
+                    <!-- タイトル -->
+                    <div class="mb-3">
+                        <label for="title" class="form-label">タイトル</label>
+                        <input type="text"
+                               class="form-control"
+                               id="title"
+                               th:field="*{title}"
+                               required>
+                        <div class="invalid-feedback">
+                            タイトルを入力してください
+                        </div>
+                    </div>
+
+                    <!-- 説明 -->
+                    <div class="mb-3">
+                        <label for="description" class="form-label">説明</label>
+                        <textarea class="form-control"
+                                 id="description"
+                                 th:field="*{description}"
+                                 rows="3"></textarea>
+                    </div>
+
+                    <!-- 期限 -->
+                    <div class="mb-3">
+                        <label for="deadline" class="form-label">期限</label>
+                        <input type="datetime-local"
+                               class="form-control"
+                               id="deadline"
+                               th:field="*{deadline}">
+                    </div>
+
+                    <!-- 優先度 -->
+                    <div class="mb-3">
+                        <label for="priority" class="form-label">優先度</label>
+                        <select class="form-select"
+                                id="priority"
+                                th:field="*{priority}"
+                                required>
+                            <option value="">選択してください</option>
+                            <option th:each="priority : ${priorities}"
+                                    th:value="${priority}"
+                                    th:text="${priority.displayName}"
+                                    th:class="${'priority-option-' + priority}">優先度</option>
+                        </select>
+                    </div>
+
+                    <!-- ステータス -->
+                    <div class="mb-3">
+                        <label for="status" class="form-label">ステータス</label>
+                        <select class="form-control"
+                                id="status"
+                                th:field="*{status}"
+                                required>
+                            <option value="">選択してください</option>
+                            <option th:each="status : ${statuses}"
+                                    th:value="${status}"
+                                    th:text="${status.displayName}">ステータス</option>
+                        </select>
+                    </div>
+
+                    <!-- 送信ボタン -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            <span th:text="${task.id == null ? '作成' : '更新'}">保存</span>
+                        </button>
+                        <a th:href="@{/tasks}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> 戻る
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Form用JavaScript -->
+        <script th:src="@{/js/task-form.js}"></script>
+    </div>
+</body>
+</html>

@@ -1,0 +1,44 @@
+/* 習慣カード */
+.habit-card {
+    transition: all 0.3s ease;
+}
+
+.habit-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* カレンダーグリッド */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-top: 10px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.calendar-day.completed {
+    background-color: #28a745;
+    color: white;
+}
+
+/* ストリーク表示 */
+.streak-badge {
+    background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .calendar-day {
+        font-size: 0.7rem;
+    }
+}

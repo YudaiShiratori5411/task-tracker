@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: html}">
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>習慣トラッカー</h2>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newHabitModal">
+                <i class="fas fa-plus"></i> 新規習慣
+            </button>
+        </div>
+
+        <!-- 習慣一覧 -->
+        <div class="row">
+            <div class="col-md-4 mb-4" th:each="habit : ${habits}">
+                <div class="card habit-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5 class="card-title" th:text="${habit.name}">習慣名</h5>
+                            <span class="badge bg-primary">
+                                <i class="fas fa-fire"></i>
+                                <span th:text="${habit.currentStreak}">0</span>日連続
+                            </span>
+                        </div>
+                        <p class="card-text" th:text="${habit.description}">説明</p>
+                        
+                        <!-- 習慣の進捗カレンダー -->
+                        <div class="habit-calendar mb-3">
+                            <div class="calendar-grid">
+                                <div th:each="date : ${last30Days}" 
+                                     th:class="${habit.isCompletedOn(date) ? 'calendar-day completed' : 'calendar-day'}"
+                                     th:text="${#temporals.format(date, 'd')}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- アクションボタン -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button class="btn btn-success btn-sm" 
+                                    th:onclick="'markHabitComplete(' + ${habit.id} + ')'"
+                                    th:disabled="${habit.isCompletedToday()}">
+                                <i class="fas fa-check"></i> 完了
+                            </button>
+                            <div class="btn-group">
+                                <button class="btn btn-outline-secondary btn-sm"
+                                        th:onclick="'editHabit(' + ${habit.id} + ')'">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm"
+                                        th:onclick="'deleteHabit(' + ${habit.id} + ')'">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新規習慣モーダル -->
+        <div class="modal fade" id="newHabitModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">新規習慣の作成</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="newHabitForm">
+                            <div class="mb-3">
+                                <label for="habitName" class="form-label">習慣名</label>
+                                <input type="text" class="form-control" id="habitName" name="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="habitDescription" class="form-label">説明</label>
+                                <textarea class="form-control" id="habitDescription" name="description" rows="3"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="targetDays" class="form-label">目標日数</label>
+                                <input type="number" class="form-control" id="targetDays" name="targetDays" min="1" value="30">
+                            </div>
+                            <button type="submit" class="btn btn-primary">作成</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
