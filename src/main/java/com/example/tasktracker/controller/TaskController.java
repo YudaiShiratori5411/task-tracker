@@ -1,6 +1,8 @@
 package com.example.tasktracker.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,6 +133,26 @@ public class TaskController {
         } catch (Exception e) {
             logger.error("タスクの削除中にエラーが発生しました: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+//    優先度変更用のエンドポイント
+    @PostMapping("/{id}/priority")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateTaskPriority(
+            @PathVariable Long id,
+            @RequestParam Priority priority) {
+        try {
+            Task task = taskService.updateTaskPriority(id, priority);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("priority", priority);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "優先度の更新に失敗しました");
+            return ResponseEntity.badRequest().body(response);
         }
     }
 }

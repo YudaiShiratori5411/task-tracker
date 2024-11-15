@@ -132,33 +132,29 @@
 
 
 
-/* Priority Filter Styles */
+/* タスクフィルター機能関連 */
 .btn-group[role="group"] {
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    border-collapse: separate;
-    border-spacing: 0;
+/*    border-collapse: separate;*/
+/*    border-spacing: 0;*/
 }
-
 .btn-group .btn {
     transition: all 0.2s ease;
     margin-left: 0.1px !important;
 }
 .btn-group .btn:first-child {
-    margin-left: 0;
+/*    margin-left: 0;*/
     border-top-left-radius: 0.25rem;
     border-bottom-left-radius: 0.25rem;
 }
-
 .btn-group .btn.active {
     transform: scale(1.05);
     font-weight: bold;
 }
-
 /* タスクカードのトランジション */
 .task-card {
     transition: opacity 0.3s ease;
 }
-
 /* 空の状態のメッセージ */
 .empty-state {
     border: 2px dashed #dee2e6;
@@ -172,4 +168,399 @@
 
 
 
+/* ソートボタンのスタイル */
+#sortByPriority {
+    transition: all 0.2s ease;
+}
+#sortByPriority.active {
+    background-color: #0d6efd;
+    color: white;
+}
+#sortByPriority:hover {
+    transform: translateY(-1px);
+}
+/* ソートアニメーション */
+.task-card {
+    transition: all 0.3s ease;
+}
+/* コントロールグループのレイアウト */
+.controls-group {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+@media (max-width: 768px) {
+    .controls-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
 
+
+
+
+/* 優先度変更アニメーション */
+.task-card {
+    transition: all 0.3s ease;
+}
+.priority-change {
+    animation: priorityChange 0.5s ease;
+}
+@keyframes priorityChange {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* 優先度変更時の色変更アニメーション */
+.task-card .card {
+    transition: border-left-color 0.3s ease;
+}
+.priority-badge {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+/* フラッシュ効果 */
+.priority-flash {
+    animation: flashPriority 0.5s ease;
+}
+@keyframes flashPriority {
+    0% {
+        background-color: transparent;
+    }
+    50% {
+        background-color: rgba(0,0,0,0.05);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+
+
+
+
+/* タスクリストのスタイル */
+.task-list {
+    position: relative;
+    z-index: 1;
+}
+/* タスクカードの基本スタイル */
+.task-card {
+    position: relative;
+    z-index: 1;
+}
+/* ドロップダウン関連のスタイル */
+.task-card .dropdown {
+    position: relative;
+}
+/* ドロップダウンが開いているときのスタイル */
+.task-card .dropdown.show {
+    position: relative;
+    z-index: 1010; /* 高い値を設定 */
+}
+.task-card .dropdown.show .dropdown-menu {
+    z-index: 1011; /* ドロップダウンメニューはさらに上に */
+    position: absolute;
+}
+/* ホバー時のスタイル調整 */
+.task-card:hover {
+    z-index: 2; /* ホバー時は他のカードより上に */
+}
+/* ドラッグ中のスタイル */
+.task-card.dragging {
+    z-index: 1000;
+}
+/* アニメーションの調整 */
+.task-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* z-indexのトランジションは除外 */
+}
+/* カード内のコンテンツ */
+.task-card .card {
+    position: relative;
+    background: white; /* 背景色を確実に設定 */
+}
+/* トースト通知とモーダルは最前面に */
+#toastContainer {
+    z-index: 1100;
+}
+.modal {
+    z-index: 1050;
+}
+
+
+
+
+/* ドロップダウン関連のスタイル追加 */
+.task-card .dropdown-menu {
+    transition: opacity 0.2s ease;
+}
+
+.task-card .dropdown-menu.show {
+    display: block;
+    opacity: 1;
+}
+
+.task-card .dropdown-menu.hiding {
+    opacity: 0;
+}
+
+/* ドロップダウンが開いているカードのスタイル */
+.task-card[data-dropdown-open="true"] {
+    z-index: 1010;
+}
+
+.task-card[data-dropdown-open="true"] .dropdown-menu {
+    z-index: 1011;
+}
+
+
+
+
+
+
+
+
+/* 優先度バッジのスタイル更新 */
+.priority-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: normal;
+    transition: all 0.2s ease;
+}
+
+/* 優先度ごとのスタイル */
+.priority-badge.priority-HIGH {
+    background-color: #dc3545;
+    color: white;
+}
+
+.priority-badge.priority-MEDIUM {
+    background-color: #ffc107;
+    color: black;
+}
+
+.priority-badge.priority-LOW {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* アイコンのアニメーション */
+.priority-badge i {
+    transition: transform 0.2s ease;
+}
+
+.priority-badge:hover i {
+    transform: scale(1.2);
+}
+
+/* 優先度ごとのアイコン色調整 */
+.priority-HIGH i {
+    color: white;
+}
+
+.priority-MEDIUM i {
+    color: #000;
+}
+
+.priority-LOW i {
+    color: white;
+}
+
+/* ドロップダウンメニューの優先度アイコン */
+.dropdown-item i {
+    width: 1rem;
+    text-align: center;
+    margin-right: 0.5rem;
+}
+
+.dropdown-item[data-priority="HIGH"] i {
+    color: #dc3545;
+}
+
+.dropdown-item[data-priority="MEDIUM"] i {
+    color: #ffc107;
+}
+
+.dropdown-item[data-priority="LOW"] i {
+    color: #6c757d;
+}
+
+
+
+
+
+
+
+
+
+
+
+/* 優先度アイコンのスタイル */
+.priority-icon {
+    font-size: 1.1rem;
+}
+
+/* 優先度ごとのアイコン色 */
+.priority-HIGH .priority-icon {
+    color: #dc3545;  /* 赤 - 高優先度 */
+}
+
+.priority-MEDIUM .priority-icon {
+    color: #ffc107;  /* 黄 - 中優先度 */
+}
+
+.priority-LOW .priority-icon {
+    color: #6c757d;  /* グレー - 低優先度 */
+}
+
+/* アイコンのアニメーション */
+.priority-icon {
+    transition: transform 0.2s ease;
+}
+
+.task-card:hover .priority-icon {
+    transform: scale(1.1);
+}
+
+/* 既存の優先度バッジのスタイル */
+.priority-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.priority-badge.priority-HIGH {
+    background-color: #dc3545;
+    color: white;
+}
+
+.priority-badge.priority-MEDIUM {
+    background-color: #ffc107;
+    color: black;
+}
+
+.priority-badge.priority-LOW {
+    background-color: #6c757d;
+    color: white;
+}
+
+
+
+
+
+
+
+/* アクションボタンのスタイル */
+.task-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.task-actions .btn i {
+    margin-right: 0.3rem;
+}
+
+/* ドロップダウンボタンのスタイル */
+.task-actions .dropdown-toggle i {
+    margin-right: 0.3rem;
+}
+
+.task-actions .dropdown-item i {
+    width: 1rem;
+    margin-right: 0.5rem;
+}
+
+
+
+
+
+
+/* アクションボタンの基本スタイル */
+.task-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+/* 優先度ボタンのスタイル */
+.task-actions .dropdown-toggle i {
+    color: #495057;
+}
+.task-actions .btn-outline-secondary:hover i {
+    color: #495057; /* ホバー時も濃いグレーのまま */
+}
+
+/* 編集ボタンのスタイル */
+.btn-outline-primary i {
+    color: #0d6efd;
+}
+.btn-outline-primary:hover i {
+    color: white; /* ホバー時は白 */
+}
+
+/* 削除ボタンのスタイル */
+.btn-outline-danger i {
+    color: #dc3545;
+}
+.btn-outline-danger:hover i {
+    color: white; /* ホバー時は白 */
+}
+
+/* ドロップダウンメニュー内のアイコン */
+.dropdown-item i {
+    width: 1rem;
+    margin-right: 0.5rem;
+}
+
+/* ドロップダウンメニューのアイテムホバー時 */
+.dropdown-item:hover i {
+    color: inherit;
+}
+
+
+
+
+
+
+/* 空の状態のスタイル */
+.border-dashed {
+    border-style: dashed !important;
+    border-width: 2px !important;
+}
+
+.task-list {
+    min-height: 100px;
+}
+
+/* アニメーション効果（オプション） */
+.task-list > div {
+    transition: opacity 0.3s ease;
+}
+
+
+
+
+
+/* empty-messageのスタイル */
+.empty-message {
+    transition: display 0.3s ease;
+}
+
+/* フィルター時のアニメーション */
+.task-card {
+    transition: all 0.3s ease;
+}

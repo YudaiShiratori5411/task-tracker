@@ -73,7 +73,7 @@ public interface TaskMapper {
             "deadline = #{deadline}, " +
             "priority = #{priority, typeHandler=com.example.tasktracker.typehandler.PriorityTypeHandler}, " +
             "status = #{status, typeHandler=com.example.tasktracker.typehandler.StatusTypeHandler}, " +
-            "position = #{position}, " +
+            "position = COALESCE(#{position}, (SELECT position FROM (SELECT position FROM tasks WHERE id = #{id}) AS temp)), " +
             "updated_at = NOW() " +
             "WHERE id = #{id}")
     void update(Task task);
@@ -87,3 +87,4 @@ public interface TaskMapper {
     @Insert("INSERT INTO task_tags (task_id, tag_id) VALUES (#{taskId}, #{tagId})")
     void insertTaskTag(@Param("taskId") Long taskId, @Param("tagId") Long tagId);
 }
+

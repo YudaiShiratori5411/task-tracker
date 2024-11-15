@@ -20,9 +20,7 @@ public class HabitServiceImpl implements HabitService {
     @Override
     public List<Habit> getAllHabits() {
         List<Habit> habits = habitMapper.findAll();
-        for (Habit habit : habits) {
-            habit.setCompletedDates(habitMapper.findCompletionDates(habit.getId()));
-        }
+        habits.forEach(habit -> updateStreaks(habit.getId()));
         return habits;
     }
     
@@ -30,16 +28,17 @@ public class HabitServiceImpl implements HabitService {
     public Habit getHabitById(Long id) {
         Habit habit = habitMapper.findById(id);
         if (habit != null) {
-            habit.setCompletedDates(habitMapper.findCompletionDates(id));
+            updateStreaks(habit.getId());
         }
         return habit;
     }
     
     @Override
     @Transactional
-    public Habit createHabit(Habit habit) {
+    public void createHabit(Habit habit) {
+        habit.setCurrentStreak(0);
+        habit.setBestStreak(0);
         habitMapper.insert(habit);
-        return habit;
     }
     
     @Override
@@ -57,27 +56,38 @@ public class HabitServiceImpl implements HabitService {
     @Override
     @Transactional
     public void markComplete(Long habitId, LocalDate date) {
-        Habit habit = getHabitById(habitId);
-        if (habit != null && !habit.isCompletedOn(date)) {
-            habitMapper.insertCompletion(habitId, date);
-            updateStreaks(habit);
-        }
+        habitMapper.insertCompletion(habitId, date);
+        updateStreaks(habitId);
     }
     
-    private void updateStreaks(Habit habit) {
-        List<LocalDate> completions = habitMapper.findCompletionDates(habit.getId());
-        int currentStreak = calculateCurrentStreak(completions);
-        habit.setCurrentStreak(currentStreak);
-        
-        if (currentStreak > habit.getBestStreak()) {
-            habit.setBestStreak(currentStreak);
+    @Override
+    @Transactional
+    public void markIncomplete(Long habitId, LocalDate date) {
+        habitMapper.deleteCompletion(habitId, date);
+        updateStreaks(habitId);
+    }
+    
+    @Override
+    @Transactional
+    public void updateStreaks(Long habitId) {
+        Habit habit = habitMapper.findById(habitId);
+        if (habit != null) {
+            List<LocalDate> completions = habitMapper.findCompletionDates(habitId);
+            int currentStreak = calculateCurrentStreak(completions);
+            habit.setCurrentStreak(currentStreak);
+            
+            // BestStreakがnullの場合の処理を追加
+            int bestStreak = habit.getBestStreak() != null ? habit.getBestStreak() : 0;
+            if (currentStreak > bestStreak) {
+                habit.setBestStreak(currentStreak);
+            }
+            
+            habitMapper.update(habit);
         }
-        
-        habitMapper.update(habit);
     }
     
     private int calculateCurrentStreak(List<LocalDate> completions) {
-        if (completions.isEmpty()) {
+        if (completions == null || completions.isEmpty()) {
             return 0;
         }
         
@@ -85,10 +95,12 @@ public class HabitServiceImpl implements HabitService {
         LocalDate today = LocalDate.now();
         LocalDate lastDate = completions.get(completions.size() - 1);
         
+        // 最後の完了日が昨日より前なら連続記録は0
         if (lastDate.isBefore(today.minusDays(1))) {
             return 0;
         }
         
+        // 連続日数を計算
         for (int i = completions.size() - 2; i >= 0; i--) {
             LocalDate currentDate = completions.get(i);
             LocalDate nextDate = completions.get(i + 1);

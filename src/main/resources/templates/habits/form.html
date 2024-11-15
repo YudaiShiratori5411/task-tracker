@@ -1,10 +1,69 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
-</head>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: html}">
 <body>
+    <div th:fragment="content">
+        <div class="card">
+            <div class="card-header">
+                <h3 th:text="${habit.id == null ? '習慣の新規作成' : '習慣の編集'}">習慣の新規作成</h3>
+            </div>
+            <div class="card-body">
+                <form th:action="@{${habit.id == null ? '/habits' : '/habits/edit/' + habit.id}}"
+                      th:object="${habit}"
+                      method="post"
+                      class="needs-validation"
+                      novalidate>
+                    
+                    <!-- 習慣名 -->
+                    <div class="mb-3">
+                        <label for="name" class="form-label">習慣名</label>
+                        <input type="text"
+                               class="form-control"
+                               id="name"
+                               th:field="*{name}"
+                               required>
+                        <div class="invalid-feedback">
+                            習慣名を入力してください
+                        </div>
+                    </div>
 
+                    <!-- 説明 -->
+                    <div class="mb-3">
+                        <label for="description" class="form-label">説明</label>
+                        <textarea class="form-control"
+                                 id="description"
+                                 th:field="*{description}"
+                                 rows="3"></textarea>
+                    </div>
+
+                    <!-- 目標日数 -->
+                    <div class="mb-3">
+                        <label for="targetDays" class="form-label">目標日数</label>
+                        <input type="number"
+                               class="form-control"
+                               id="targetDays"
+                               th:field="*{targetDays}"
+                               min="1"
+                               value="30"
+                               required>
+                        <div class="invalid-feedback">
+                            1日以上の目標日数を設定してください
+                        </div>
+                    </div>
+
+                    <!-- 送信ボタン -->
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            <span th:text="${habit.id == null ? '作成' : '更新'}">保存</span>
+                        </button>
+                        <a th:href="@{/habits}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> 戻る
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

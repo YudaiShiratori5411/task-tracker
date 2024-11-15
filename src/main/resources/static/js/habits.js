@@ -1,88 +1,159 @@
+// グローバル変数
+let habitModal;
+
 document.addEventListener('DOMContentLoaded', function() {
-    initializeHabitManagement();
+    // モーダルの初期化
+    const modalElement = document.getElementById('habitModal');
+    if (modalElement) {
+        habitModal = new bootstrap.Modal(modalElement);
+        
+        // モーダルが閉じられたときの処理
+        modalElement.addEventListener('hidden.bs.modal', function() {
+            const form = document.getElementById('habitForm');
+            if (form) {
+                form.reset();
+                form.classList.remove('was-validated');
+            }
+        });
+    }
+
+    // フォームのバリデーション設定
+    const form = document.getElementById('habitForm');
+    if (form) {
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            if (!form.checkValidity()) {
+                event.stopPropagation();
+                form.classList.add('was-validated');
+                return;
+            }
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form)
+                });
+
+                if (response.ok) {
+                    if (habitModal) {
+                        habitModal.hide();
+                    }
+                    showToast('習慣を作成しました', 'success');
+                    window.location.reload();
+                } else {
+                    throw new Error('習慣の作成に失敗しました');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('エラーが発生しました', 'danger');
+            }
+        });
+    }
 });
 
-function initializeHabitManagement() {
-    const newHabitForm = document.getElementById('newHabitForm');
-    if (newHabitForm) {
-        newHabitForm.addEventListener('submit', handleNewHabit);
-    }
-}
+function toggleHabitCompletion(element) {
+    const habitId = element.getAttribute('data-habit-id');
+    const date = element.getAttribute('data-date');
+    const isCompleted = element.classList.contains('completed');
 
-// 新規習慣の作成
-async function handleNewHabit(event) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
+    const url = `/habits/${habitId}/${isCompleted ? 'incomplete' : 'complete'}`;
     
-    try {
-        const response = await fetch('/habits', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
-            }
-        });
-        
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `date=${date}`
+    })
+    .then(response => {
         if (response.ok) {
-            location.reload();
-        } else {
-            throw new Error('習慣の作成に失敗しました');
+            element.classList.toggle('completed');
+            updateStreakDisplay(habitId);
+            showToast('習慣を更新しました', 'success');
         }
-    } catch (error) {
+    })
+    .catch(error => {
         console.error('Error:', error);
         showToast('エラーが発生しました', 'danger');
+    });
+}
+
+function deleteHabit(id) {
+    if (confirm('この習慣を削除してもよろしいですか？')) {
+        fetch(`/habits/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (response.ok) {
+                showToast('習慣を削除しました', 'success');
+                window.location.reload();
+            } else {
+                throw new Error('削除に失敗しました');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('削除中にエラーが発生しました', 'danger');
+        });
     }
 }
 
-// 習慣の完了マーク
-async function markHabitComplete(habitId) {
-    try {
-        const response = await fetch(`/habits/${habitId}/complete`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
-            }
-        });
-        
-        if (response.ok) {
-            location.reload();
-            showToast('習慣を完了しました！', 'success');
-        } else {
-            throw new Error('習慣の完了マークに失敗しました');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        showToast('エラーが発生しました', 'danger');
-    }
+function editHabit(habitId) {
+    window.location.href = `/habits/edit/${habitId}`;
 }
 
-// 習慣の削除
-async function deleteHabit(habitId) {
-    if (!confirm('この習慣を削除してもよろしいですか？')) {
-        return;
-    }
+function updateStreakDisplay(habitId) {
+    fetch(`/habits/${habitId}`)
+        .then(response => response.json())
+        .then(habit => {
+            const streakElement = document.querySelector(`[data-habit-id="${habitId}"] .streak`);
+            if (streakElement) {
+                streakElement.textContent = habit.currentStreak;
+            }
+            
+            const progressBar = document.querySelector(`[data-habit-id="${habitId}"] .progress-bar`);
+            if (progressBar) {
+                const completion = habit.completionRate;
+                progressBar.style.width = `${completion}%`;
+                progressBar.textContent = `${completion.toFixed(1)}%`;
+            }
+        })
+        .catch(error => console.error('Error updating streak:', error));
+}
+
+function showToast(message, type) {
+    const toastContainer = document.getElementById('toast-container') || createToastContainer();
     
-    try {
-        const response = await fetch(`/habits/${habitId}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
-            }
-        });
-        
-        if (response.ok) {
-            location.reload();
-            showToast('習慣を削除しました', 'success');
-        } else {
-            throw new Error('習慣の削除に失敗しました');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        showToast('エラーが発生しました', 'danger');
-    }
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center border-0 bg-${type} text-white`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    `;
+    
+    toastContainer.appendChild(toast);
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+    
+    toast.addEventListener('hidden.bs.toast', () => {
+        toast.remove();
+    });
 }
 
-// 習慣の編集
-async function editHabit(habitId) {
-    // 実装予定
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+    document.body.appendChild(container);
+    return container;
 }
+
+
