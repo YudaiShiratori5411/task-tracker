@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: html}">
-<body>
+<body class="habits-list">
     <div th:fragment="content">
         <!-- ヘッダー部分のボタン -->
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -52,8 +52,8 @@
                         
                         <div class="d-flex justify-content-between align-items-center">
                             <small class="text-muted">
-                                目標: <span th:text="${habit.targetDays}">30</span>日中
-                                <span th:text="${habit.remainingDays}">30</span>日残り
+                                期間 <span th:text="${habit.targetDays}">30</span>日　
+                                あと<span th:text="${habit.remainingDays}">30</span>日で完了
                             </small>
                             <div>
                                 <button class="btn btn-sm btn-outline-primary"

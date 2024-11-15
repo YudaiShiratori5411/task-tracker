@@ -1,3 +1,7 @@
+.mb-4 {
+  margin-bottom: 10px !important;
+}
+
 .habit-card {
     transition: transform 0.2s ease;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -44,13 +48,15 @@
 }
 
 .progress {
-    height: 0.5rem;
+    height: 1.5rem;
     border-radius: 1rem;
 }
 
 .progress-bar {
     background-color: #28a745;
     transition: width 0.3s ease;
+    font-size: 1rem;
+    line-height: 1.5rem;
 }
 
 .badge {

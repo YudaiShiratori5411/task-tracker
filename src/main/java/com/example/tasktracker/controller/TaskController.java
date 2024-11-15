@@ -136,23 +136,40 @@ public class TaskController {
         }
     }
     
-//    優先度変更用のエンドポイント
+    //  優先度変更用のエンドポイント
     @PostMapping("/{id}/priority")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> updateTaskPriority(
-            @PathVariable Long id,
-            @RequestParam Priority priority) {
-        try {
-            Task task = taskService.updateTaskPriority(id, priority);
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("priority", priority);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("message", "優先度の更新に失敗しました");
-            return ResponseEntity.badRequest().body(response);
-        }
-    }
+     public ResponseEntity<Map<String, Object>> updateTaskPriority(
+	          @PathVariable Long id,
+	          @RequestParam Priority priority) {
+	      try {
+	          Task task = taskService.updateTaskPriority(id, priority);
+	          Map<String, Object> response = new HashMap<>();
+	          response.put("success", true);
+	          response.put("priority", priority);
+	          return ResponseEntity.ok(response);
+	      } catch (Exception e) {
+	          Map<String, Object> response = new HashMap<>();
+	          response.put("success", false);
+	          response.put("message", "優先度の更新に失敗しました");
+	          return ResponseEntity.badRequest().body(response);
+          }
+	 }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

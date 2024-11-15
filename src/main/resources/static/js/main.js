@@ -742,11 +742,16 @@ function createPriorityButton(card) {
             e.preventDefault();
             const newPriority = e.target.closest('.dropdown-item').dataset.priority;
             await changePriority(card, newPriority);
+            // 優先度変更後にページをリロード
+            window.location.reload();
         });
     });
 
     return button;
 }
+
+
+
 
 
 
