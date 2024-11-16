@@ -1,3 +1,10 @@
+.mt-4 {
+  margin-top: 15px !important;
+}
+.mb-4 {
+  margin-bottom: 10px !important;
+}
+
 .task-card {
     transition: transform 0.2s ease;
 }
@@ -172,7 +179,7 @@
 #sortByPriority {
     transition: all 0.2s ease;
 }
-#sortByPriority.active {
+#sortByPriority.active i {
     background-color: #0d6efd;
     color: white;
 }
@@ -256,6 +263,7 @@
 .task-card {
     position: relative;
     z-index: 1;
+    transition: transform 0.4s ease, box-shadow 0.4s ease !important;
 }
 /* ドロップダウン関連のスタイル */
 .task-card .dropdown {
@@ -272,7 +280,9 @@
 }
 /* ホバー時のスタイル調整 */
 .task-card:hover {
-    z-index: 2; /* ホバー時は他のカードより上に */
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    z-index: 2;
 }
 /* ドラッグ中のスタイル */
 .task-card.dragging {
@@ -559,6 +569,22 @@
 .empty-message {
     transition: display 0.3s ease;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* フィルター時のアニメーション */
 .task-card {
