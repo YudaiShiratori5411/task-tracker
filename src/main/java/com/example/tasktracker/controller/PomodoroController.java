@@ -1,6 +1,13 @@
 package com.example.tasktracker.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.tasktracker.model.PomodoroSession;
+import com.example.tasktracker.model.Task;
 import com.example.tasktracker.service.PomodoroService;
 import com.example.tasktracker.service.TaskService;
 
@@ -17,45 +25,84 @@ import com.example.tasktracker.service.TaskService;
 @RequestMapping("/pomodoro")
 public class PomodoroController {
     
-    @Autowired
-    private PomodoroService pomodoroService;
+    private static final Logger logger = LoggerFactory.getLogger(PomodoroController.class);
     
     @Autowired
     private TaskService taskService;
     
-    // ポモドーロタイマー画面表示
-    @GetMapping("/{taskId}")
-    public String showTimer(@PathVariable Long taskId, Model model) {
-        model.addAttribute("task", taskService.getTaskById(taskId));
-        model.addAttribute("sessions", pomodoroService.getTodaysSessions(taskId));
-        return "pomodoro/timer";
-    }
-    
-    // セッション開始
-    @PostMapping("/{taskId}/start")
-    @ResponseBody
-    public PomodoroSession startSession(@PathVariable Long taskId) {
-        return pomodoroService.startSession(taskId);
-    }
-    
-    // セッション完了
-    @PostMapping("/{sessionId}/complete")
-    @ResponseBody
-    public void completeSession(@PathVariable Long sessionId) {
-        pomodoroService.completeSession(sessionId);
-    }
-    
-    // セッション中断
-    @PostMapping("/{sessionId}/interrupt")
-    @ResponseBody
-    public void interruptSession(@PathVariable Long sessionId) {
-        pomodoroService.interruptSession(sessionId);
-    }
-    
-    // 今日のサマリー表示
+    @Autowired
+    private PomodoroService pomodoroService;
+
+    // サマリーページのエンドポイントを先に定義
     @GetMapping("/summary")
     public String showSummary(Model model) {
-        model.addAttribute("summary", pomodoroService.getTodaysSummary());
-        return "pomodoro/summary";
+        try {
+            logger.info("Showing pomodoro summary");
+            
+            model.addAttribute("todaysSessions", pomodoroService.getTodaysSessions());
+            model.addAttribute("totalFocusTime", pomodoroService.getTodaysTotalFocusTime());
+            model.addAttribute("completedSessions", pomodoroService.countTodaysCompletedSessions());
+            
+            // 統計情報の追加
+            Map<String, Object> stats = new HashMap<>();
+            stats.put("totalSessions", pomodoroService.countTodaysCompletedSessions());
+            stats.put("totalTime", pomodoroService.getTodaysTotalFocusTime());
+            stats.put("averageSessionTime", calculateAverageSessionTime());
+            
+            model.addAttribute("stats", stats);
+            
+            return "pomodoro/summary";
+        } catch (Exception e) {
+            logger.error("Error showing summary", e);
+            return "redirect:/tasks";
+        }
+    }
+
+    // タスク別のタイマー表示
+    @GetMapping("/task/{taskId}")  // パスを変更
+    public String showTimer(@PathVariable Long taskId, Model model) {
+        try {
+            logger.info("Requesting timer for task ID: {}", taskId);
+            
+            Task task = taskService.getTaskById(taskId);
+            if (task == null) {
+                logger.warn("Task not found for ID: {}", taskId);
+                return "redirect:/tasks";
+            }
+            
+            PomodoroSession pomodoroSession = pomodoroService.getCurrentSession(taskId);
+            
+            model.addAttribute("task", task);
+            model.addAttribute("pomodoroSession", pomodoroSession);
+            model.addAttribute("pomodoroHistory", pomodoroService.getTodaysSessions(taskId));
+            model.addAttribute("totalFocusTime", pomodoroService.getTodaysTotalFocusTime());
+            
+            return "pomodoro/timer";
+        } catch (Exception e) {
+            logger.error("Error showing timer for task ID: " + taskId, e);
+            return "redirect:/tasks";
+        }
+    }
+
+    @PostMapping("/task/{taskId}/start")  // パスを変更
+    @ResponseBody
+    public ResponseEntity<PomodoroSession> startSession(@PathVariable Long taskId) {
+        try {
+            PomodoroSession pomodoroSession = pomodoroService.startSession(taskId);
+            return ResponseEntity.ok(pomodoroSession);
+        } catch (Exception e) {
+            logger.error("Error starting session for task ID: " + taskId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    private double calculateAverageSessionTime() {
+        int totalSessions = pomodoroService.countTodaysCompletedSessions();
+        if (totalSessions == 0) return 0;
+        return (double) pomodoroService.getTodaysTotalFocusTime() / totalSessions;
     }
 }
+
+
+
+

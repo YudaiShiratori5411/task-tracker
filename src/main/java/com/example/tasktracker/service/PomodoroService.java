@@ -1,7 +1,6 @@
 package com.example.tasktracker.service;
 
 import java.util.List;
-import java.util.Map;
 
 import com.example.tasktracker.model.PomodoroSession;
 
@@ -10,5 +9,8 @@ public interface PomodoroService {
     void completeSession(Long sessionId);
     void interruptSession(Long sessionId);
     List<PomodoroSession> getTodaysSessions(Long taskId);
-    Map<String, Object> getTodaysSummary();
+    List<PomodoroSession> getTodaysSessions();
+    int getTodaysTotalFocusTime();
+    int countTodaysCompletedSessions();
+    PomodoroSession getCurrentSession(Long taskId);
 }

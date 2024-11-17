@@ -4,14 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Tracker</title>
-
-    <!-- Bootstrap 5.0.2 CSS -->
+    
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- カスタムCSS -->
     <link th:href="@{/css/style.css}" rel="stylesheet">
     <link th:href="@{/css/habits.css}" rel="stylesheet">
+    <!-- ポモドーロCSS -->
+    <link th:href="@{/css/pomodoro.css}" rel="stylesheet">
 </head>
 <body>
     <!-- ナビゲーションバー -->
@@ -33,6 +35,11 @@
                             <i class="fas fa-calendar-check"></i> 習慣管理
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/pomodoro/summary}">
+                            <i class="fas fa-clock"></i> ポモドーロ
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -44,17 +51,16 @@
         </div>
     </main>
 
-    <!-- jQuery (必要な場合) -->
+    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
-    <!-- Bootstrap 5.0.2 JS Bundle -->
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-    
     <!-- Sortable.js -->
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <!-- カスタムJS -->
     <script th:src="@{/js/main.js}"></script>
     <script th:src="@{/js/habits.js}"></script>
+    <script th:src="@{/js/task-operations.js}"></script>
+    <script th:src="@{/js/pomodoro.js}"></script>
 </body>
 </html>

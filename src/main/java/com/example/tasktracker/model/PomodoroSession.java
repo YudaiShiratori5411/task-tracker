@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 public class PomodoroSession {
     private Long id;
+    private Task task;
     private Long taskId;
     private LocalDateTime startTime;
     private LocalDateTime endTime;

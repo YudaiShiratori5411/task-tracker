@@ -1,69 +1,228 @@
+/* タイマーコンテナ */
 .pomodoro-container {
-    max-width: 600px;
+    max-width: 800px;
     margin: 0 auto;
     padding: 2rem;
 }
 
-.timer-display {
-    position: relative;
-    width: 300px;
-    height: 300px;
-    margin: 0 auto;
+/* タスク情報 */
+.task-info {
+    text-align: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.task-title {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.task-description {
+    color: #6c757d;
+}
+
+/* タイマー表示 */
+.timer-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2rem 0;
 }
 
 .timer-circle {
+    width: 300px;
+    height: 300px;
+    position: relative;
+    border-radius: 50%;
+    background: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.timer-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background: #e9ecef;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    background: conic-gradient(
+        #28a745 0%,
+        #e9ecef 0%
+    );
+    transition: background 0.3s ease;
 }
 
-.time {
-    font-size: 3.5rem;
+.timer-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    background: white;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#timeDisplay {
+    font-size: 4rem;
     font-weight: bold;
     font-family: monospace;
+    color: #2c3e50;
+    line-height: 1;
+    margin-bottom: 0.5rem;
 }
 
+#timerStatus {
+    font-size: 1.2rem;
+    color: #6c757d;
+}
+
+/* タイマーコントロール */
 .timer-controls {
     display: flex;
     gap: 1rem;
     justify-content: center;
+    margin-bottom: 2rem;
 }
 
 .timer-controls button {
     min-width: 120px;
-}
-
-.session-info .card {
-    text-align: center;
     transition: all 0.3s ease;
 }
 
-.session-info .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+.timer-controls button:hover {
+    transform: translateY(-2px);
 }
 
-.session-info h2 {
-    color: #28a745;
-    margin: 0;
+/* セッション設定 */
+.session-settings .card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
+.session-settings .form-group {
+    margin-bottom: 1rem;
+}
+
+.sound-settings {
+    border-top: 1px solid #dee2e6;
+    padding-top: 1rem;
+}
+
+.volume-control {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* セッション履歴 */
+.session-history .table {
+    margin-bottom: 0;
+}
+
+.session-history .badge {
+    font-weight: normal;
+    padding: 0.5rem 0.75rem;
+}
+
+/* レスポンシブ対応 */
 @media (max-width: 768px) {
-    .timer-display {
+    .timer-circle {
         width: 250px;
         height: 250px;
     }
-    
-    .time {
-        font-size: 2.5rem;
+
+    .timer-content {
+        width: 230px;
+        height: 230px;
     }
-    
-    .session-info .card {
-        margin-bottom: 1rem;
+
+    #timeDisplay {
+        font-size: 3rem;
+    }
+
+    .timer-controls button {
+        min-width: 100px;
+        padding: 0.5rem 1rem;
     }
 }
+
+/* アニメーション */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.timer-circle.active {
+    animation: pulse 2s infinite;
+}
+
+/* 作業時間と休憩時間の色分け */
+.timer-circle.work {
+    border: 8px solid #28a745;
+}
+
+.timer-circle.break {
+    border: 8px solid #ffc107;
+}
+
+/* 音量スライダーのカスタマイズ */
+.form-range::-webkit-slider-thumb {
+    background: #28a745;
+}
+
+.form-range::-moz-range-thumb {
+    background: #28a745;
+}
+
+.form-range::-ms-thumb {
+    background: #28a745;
+}
+
+/* セッション設定のホバーエフェクト */
+.session-settings .card:hover {
+    transform: translateY(-2px);
+    transition: transform 0.3s ease;
+}
+
+/* 通知音選択のカスタマイズ */
+.sound-settings select {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+/* 完了状態のアニメーション */
+@keyframes completion {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.session-completed {
+    animation: completion 0.5s ease-out;
+}
+
+
+

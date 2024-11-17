@@ -1,3 +1,171 @@
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org"-->
+<!--      th:replace="~{layout/base :: html}">-->
+<!--<body>-->
+<!--    <div th:fragment="content">-->
+<!--         ヘッダー部分 -->
+<!--        <div class="d-flex justify-content-between align-items-center mb-4">-->
+<!--            <h2>タスク管理</h2>-->
+<!--            <a th:href="@{/tasks/create}" class="btn btn-primary">-->
+<!--                <i class="fas fa-plus"></i> 新規タスク-->
+<!--            </a>-->
+<!--        </div>-->
+
+<!--         タスクボード -->
+<!--        <div class="row">-->
+<!--             TODO列 -->
+<!--            <div class="col-md-4">-->
+<!--                <div class="card h-100" data-status="TODO">-->
+<!--                    <div class="card-header bg-info text-white">-->
+<!--                        <i class="fas fa-list"></i> 実行予定-->
+<!--                    </div>-->
+<!--                    <div class="card-body task-list">-->
+<!--                        <div th:each="task : ${tasks}" -->
+<!--                             th:if="${task.status?.name() == 'TODO'}"-->
+<!--                             class="task-card mb-3"-->
+<!--                             th:attr="data-task-id=${task.id}">-->
+<!--                            <div class="card">-->
+<!--                                <div class="card-body">-->
+<!--                                    <h5 class="card-title" th:text="${task.title}">タスクタイトル</h5>-->
+<!--                                    <p class="card-text" th:text="${task.description}">説明</p>-->
+<!--                                    <div class="task-meta">-->
+<!--                                        <span th:if="${task.deadline}" class="text-muted">-->
+<!--                                            <i class="far fa-clock"></i>-->
+<!--                                            <span th:text="${#temporals.format(task.deadline, 'yyyy/MM/dd HH:mm')}">期限</span>-->
+<!--                                        </span>-->
+<!--                                    </div>-->
+<!--                                    <div class="task-actions mt-2">-->
+<!--                                        <a th:href="@{/pomodoro/{id}(id=${task.id})}" -->
+<!--                                           class="btn btn-sm btn-outline-primary me-2">-->
+<!--                                            <i class="fas fa-clock"></i>-->
+<!--                                        </a>-->
+<!--                                        <a th:href="@{/tasks/edit/{id}(id=${task.id})}" -->
+<!--                                           class="btn btn-sm btn-outline-secondary me-2">-->
+<!--                                            <i class="fas fa-edit"></i>-->
+<!--                                        </a>-->
+<!--                                        <button class="btn btn-sm btn-outline-danger"-->
+<!--                                                onclick="deleteTask(this.getAttribute('data-task-id'))"-->
+<!--                                                th:attr="data-task-id=${task.id}">-->
+<!--                                            <i class="fas fa-trash"></i>-->
+<!--                                        </button>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--             進行中列 -->
+<!--            <div class="col-md-4">-->
+<!--                <div class="card h-100" data-status="IN_PROGRESS">-->
+<!--                    <div class="card-header bg-warning text-white">-->
+<!--                        <i class="fas fa-spinner"></i> 進行中-->
+<!--                    </div>-->
+<!--                    <div class="card-body task-list">-->
+<!--                        <div th:each="task : ${tasks}" -->
+<!--                             th:if="${task.status?.name() == 'IN_PROGRESS'}"-->
+<!--                             class="task-card mb-3"-->
+<!--                             th:attr="data-task-id=${task.id}">-->
+<!--                            <div class="card">-->
+<!--                                <div class="card-body">-->
+<!--                                    <h5 class="card-title" th:text="${task.title}">タスクタイトル</h5>-->
+<!--                                    <p class="card-text" th:text="${task.description}">説明</p>-->
+<!--                                    <div class="task-meta">-->
+<!--                                        <span th:if="${task.deadline}" class="text-muted">-->
+<!--                                            <i class="far fa-clock"></i>-->
+<!--                                            <span th:text="${#temporals.format(task.deadline, 'yyyy/MM/dd HH:mm')}">期限</span>-->
+<!--                                        </span>-->
+<!--                                    </div>-->
+<!--                                    <div class="task-actions mt-2">-->
+<!--                                        <a th:href="@{/pomodoro/{id}(id=${task.id})}" -->
+<!--                                           class="btn btn-sm btn-outline-primary me-2">-->
+<!--                                            <i class="fas fa-clock"></i>-->
+<!--                                        </a>-->
+<!--                                        <a th:href="@{/tasks/edit/{id}(id=${task.id})}" -->
+<!--                                           class="btn btn-sm btn-outline-secondary me-2">-->
+<!--                                            <i class="fas fa-edit"></i>-->
+<!--                                        </a>-->
+<!--                                        <button class="btn btn-sm btn-outline-danger"-->
+<!--                                                onclick="deleteTask(this.getAttribute('data-task-id'))"-->
+<!--                                                th:attr="data-task-id=${task.id}">-->
+<!--                                            <i class="fas fa-trash"></i>-->
+<!--                                        </button>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--             完了列 -->
+<!--            <div class="col-md-4">-->
+<!--                <div class="card h-100" data-status="DONE">-->
+<!--                    <div class="card-header bg-success text-white">-->
+<!--                        <i class="fas fa-check"></i> 完了-->
+<!--                    </div>-->
+<!--                    <div class="card-body task-list">-->
+<!--                        <div th:each="task : ${tasks}" -->
+<!--                             th:if="${task.status?.name() == 'DONE'}"-->
+<!--                             class="task-card mb-3"-->
+<!--                             th:attr="data-task-id=${task.id}">-->
+<!--                            <div class="card">-->
+<!--                                <div class="card-body">-->
+<!--                                    <h5 class="card-title" th:text="${task.title}">タスクタイトル</h5>-->
+<!--                                    <p class="card-text" th:text="${task.description}">説明</p>-->
+<!--                                    <div class="task-meta">-->
+<!--                                        <span th:if="${task.deadline}" class="text-muted">-->
+<!--                                            <i class="far fa-clock"></i>-->
+<!--                                            <span th:text="${#temporals.format(task.deadline, 'yyyy/MM/dd HH:mm')}">期限</span>-->
+<!--                                        </span>-->
+<!--                                    </div>-->
+<!--                                    <div class="task-actions mt-2">-->
+<!--                                        <a th:href="@{/tasks/edit/{id}(id=${task.id})}" -->
+<!--                                           class="btn btn-sm btn-outline-secondary me-2">-->
+<!--                                            <i class="fas fa-edit"></i>-->
+<!--                                        </a>-->
+<!--                                        <button class="btn btn-sm btn-outline-danger"-->
+<!--                                                onclick="deleteTask(this.getAttribute('data-task-id'))"-->
+<!--                                                th:attr="data-task-id=${task.id}">-->
+<!--                                            <i class="fas fa-trash"></i>-->
+<!--                                        </button>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</body>-->
+<!--</html>-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: html}">
@@ -7,7 +175,7 @@
             <div>
                 <h2>タスク管理</h2>
                 <div class="d-flex align-items-center gap-3 mt-2">
-                    <!-- 優先度フィルター -->
+                     優先度フィルター 
                     <div class="btn-group" role="group" aria-label="優先度フィルター">
                         <button type="button" class="btn btn-outline-secondary btn-sm active" data-priority="ALL">
                             すべて
@@ -38,7 +206,7 @@
 
         <!-- タスクボード -->
         <div class="row">
-            <!-- TODO列 -->
+<!--             TODO列 -->
             <div class="col-md-4">
                 <div class="card mb-4">
                     <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
@@ -47,7 +215,7 @@
                               th:text="${#lists.size(tasks.?[status.name() == 'TODO'])}">0</span>
                     </div>
                     <div class="card-body task-list" data-status="TODO">
-                        <!-- タスクが存在しない場合のメッセージ -->
+<!--                         タスクが存在しない場合のメッセージ -->
                         <div th:if="${#lists.isEmpty(tasks.?[status.name() == 'TODO'])}"
                              class="text-center text-muted p-3">
                             <div class="border border-dashed rounded p-3">
@@ -88,12 +256,15 @@
                                         <span th:text="${#temporals.format(task.deadline, 'yyyy/MM/dd HH:mm')}">期限</span>
                                     </div>
                                     <div class="task-actions mt-2">
+                                        <a th:href="@{/pomodoro/task/{id}(id=${task.id})}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-clock"></i>
+                                        </a>
                                         <a th:href="@{/tasks/edit/{id}(id=${task.id})}" class="btn btn-sm btn-outline-primary me-2">
-                                            <i class="fas fa-edit"></i> 編集
+                                            <i class="fas fa-edit"></i>
                                         </a>
                                         <button class="btn btn-sm btn-outline-danger"
                                                 th:onclick="'deleteTask(' + ${task.id} + ')'">
-                                            <i class="fas fa-trash"></i> 削除
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -103,7 +274,7 @@
                 </div>
             </div>
 
-            <!-- 進行中列 -->
+<!--             進行中列 -->
             <div class="col-md-4">
                 <div class="card mb-4">
                     <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
@@ -112,7 +283,7 @@
                               th:text="${#lists.size(tasks.?[status.name() == 'IN_PROGRESS'])}">0</span>
                     </div>
                     <div class="card-body task-list" data-status="IN_PROGRESS">
-                        <!-- タスクが存在しない場合のメッセージ -->
+<!--                         タスクが存在しない場合のメッセージ -->
                         <div th:if="${#lists.isEmpty(tasks.?[status.name() == 'IN_PROGRESS'])}"
                              class="text-center text-muted p-3">
                             <div class="border border-dashed rounded p-3">
@@ -120,7 +291,7 @@
                             </div>
                         </div>
                         
-                        <!-- 進行中タスク -->
+<!--                         進行中タスク -->
                         <div th:each="task : ${tasks}"
                              th:if="${task.status != null && task.status.name() == 'IN_PROGRESS'}"
                              class="task-card mb-3"
@@ -131,7 +302,74 @@
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
                                         <div class="d-flex align-items-center gap-2">
-                                            <!-- 優先度アイコン -->
+<!--                                             優先度アイコン -->
+                                            <i class="fas" 
+                                               th:classappend="${
+                                                   task.priority != null && task.priority.name() == 'HIGH' ? 'fa-exclamation-circle text-danger' : 
+                                                   task.priority != null && task.priority.name() == 'MEDIUM' ? 'fa-dot-circle text-warning' : 
+                                                   'fa-circle text-secondary'}">
+                                            </i>
+                                            <h5 class="card-title mb-0" th:text="${task.title}">タスクタイトル</h5>
+                                        </div>
+                                        <span class="priority-badge" 
+                                              th:classappend="${'priority-' + task.priority}"
+                                              th:text="${task.priority != null ? task.priority.displayName : ''}">
+                                            優先度
+                                        </span>
+                                    </div>
+                                    <p class="card-text" th:if="${task.description}" th:text="${task.description}">説明</p>
+                                    <div class="task-meta text-muted" th:if="${task.deadline}">
+                                        <i class="far fa-clock"></i>
+                                        <span th:text="${#temporals.format(task.deadline, 'yyyy/MM/dd HH:mm')}">期限</span>
+                                    </div>
+                                    <div class="task-actions mt-2">
+                                        <a th:href="@{/pomodoro/task/{id}(id=${task.id})}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-clock"></i>
+                                        </a>
+                                        <a th:href="@{/tasks/edit/{id}(id=${task.id})}" class="btn btn-sm btn-outline-primary me-2">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-danger"
+                                                th:onclick="'deleteTask(' + ${task.id} + ')'">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+<!--             完了列 -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <span>完了</span>
+                        <span class="badge bg-white text-success" 
+                              th:text="${#lists.size(tasks.?[status.name() == 'DONE'])}">0</span>
+                    </div>
+                    <div class="card-body task-list" data-status="DONE">
+<!--                         タスクが存在しない場合のメッセージ -->
+                        <div th:if="${#lists.isEmpty(tasks.?[status.name() == 'DONE'])}"
+                             class="text-center text-muted p-3">
+                            <div class="border border-dashed rounded p-3">
+                                タスクがありません
+                            </div>
+                        </div>
+                        
+<!--                         完了タスク -->
+                        <div th:each="task : ${tasks}"
+                             th:if="${task.status != null && task.status.name() == 'DONE'}"
+                             class="task-card mb-3"
+                             th:classappend="${'priority-' + task.priority}"
+                             th:id="${'task-' + task.id}"
+                             th:attr="data-task-id=${task.id}">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+<!--                                             優先度アイコン -->
                                             <i class="fas" 
                                                th:classappend="${
                                                    task.priority != null && task.priority.name() == 'HIGH' ? 'fa-exclamation-circle text-danger' : 
@@ -153,72 +391,11 @@
                                     </div>
                                     <div class="task-actions mt-2">
                                         <a th:href="@{/tasks/edit/{id}(id=${task.id})}" class="btn btn-sm btn-outline-primary me-2">
-                                            <i class="fas fa-edit"></i> 編集
+                                            <i class="fas fa-edit"></i>
                                         </a>
                                         <button class="btn btn-sm btn-outline-danger"
                                                 th:onclick="'deleteTask(' + ${task.id} + ')'">
-                                            <i class="fas fa-trash"></i> 削除
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 完了列 -->
-            <div class="col-md-4">
-                <div class="card mb-4">
-                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                        <span>完了</span>
-                        <span class="badge bg-white text-success" 
-                              th:text="${#lists.size(tasks.?[status.name() == 'DONE'])}">0</span>
-                    </div>
-                    <div class="card-body task-list" data-status="DONE">
-                        <!-- タスクが存在しない場合のメッセージ -->
-                        <div th:if="${#lists.isEmpty(tasks.?[status.name() == 'DONE'])}"
-                             class="text-center text-muted p-3">
-                            <div class="border border-dashed rounded p-3">
-                                タスクがありません
-                            </div>
-                        </div>
-                        
-                        <!-- 完了タスク -->
-                        <div th:each="task : ${tasks}"
-                             th:if="${task.status != null && task.status.name() == 'DONE'}"
-                             class="task-card mb-3"
-                             th:classappend="${'priority-' + task.priority}"
-                             th:id="${'task-' + task.id}"
-                             th:attr="data-task-id=${task.id}">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <!-- 優先度アイコン -->
-                                            <i class="fas" 
-                                               th:classappend="${
-                                                   task.priority != null && task.priority.name() == 'HIGH' ? 'fa-exclamation-circle text-danger' : 
-                                                   task.priority != null && task.priority.name() == 'MEDIUM' ? 'fa-dot-circle text-warning' : 
-                                                   'fa-circle text-secondary'}">
-                                            </i>
-                                            <h5 class="card-title mb-0" th:text="${task.title}">タスクタイトル</h5>
-                                        </div>
-                                        <span class="priority-badge" 
-                                              th:classappend="${'priority-' + task.priority}"
-                                              th:text="${task.priority != null ? task.priority.displayName : ''}">
-                                            優先度
-                                        </span>
-                                    </div>
-                                    <p class="card-text" th:if="${task.description}" th:text="${task.description}">説明</p>
-                                    <div class="task-meta text-muted" th:if="${task.deadline}">
-                                        <i class="far fa-clock"></i>
-                                        <span th:text="${#temporals.format(task.deadline, 'yyyy/MM/dd HH:mm')}">期限</span>
-                                    </div>
-                                    <div class="task-actions mt-2">
-                                        <button class="btn btn-sm btn-outline-danger"
-                                                th:onclick="'deleteTask(' + ${task.id} + ')'">
-                                            <i class="fas fa-trash"></i> 削除
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -229,7 +406,7 @@
             </div>
         </div>
 
-        <!-- 削除確認モーダル -->
+<!--         削除確認モーダル -->
         <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -248,7 +425,7 @@
             </div>
         </div>
 
-        <!-- トースト通知用コンテナ -->
+<!--         トースト通知用コンテナ -->
         <div id="toastContainer" class="position-fixed bottom-0 end-0 p-3"></div>
     </div>
 </body>

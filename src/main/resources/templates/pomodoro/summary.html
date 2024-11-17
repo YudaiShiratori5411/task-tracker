@@ -1,10 +1,85 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
-</head>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: html}">
 <body>
+    <div th:fragment="content">
+        <div class="summary-container">
+            <h2 class="mb-4">ポモドーロ サマリー</h2>
 
+            <!-- 今日の統計 -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">完了セッション</h5>
+                            <div class="stat-number" th:text="${stats.totalSessions}">0</div>
+                            <div class="stat-label">セッション</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">総集中時間</h5>
+                            <div class="stat-number" th:text="${stats.totalTime}">0</div>
+                            <div class="stat-label">分</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">平均セッション時間</h5>
+                            <div class="stat-number" th:text="${#numbers.formatDecimal(stats.averageSessionTime, 1, 1)}">0.0</div>
+                            <div class="stat-label">分/セッション</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- セッション履歴 -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">今日のセッション履歴</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>タスク</th>
+                                    <th>開始時間</th>
+                                    <th>終了時間</th>
+                                    <th>状態</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="pomodoroSession : ${todaysSessions}">
+                                    <td>
+                                        <span th:if="${pomodoroSession.task != null}" th:text="${pomodoroSession.task.title}">タスク名</span>
+                                        <span th:if="${pomodoroSession.task == null}" class="text-muted">削除されたタスク</span>
+                                    </td>
+                                    <td th:text="${#temporals.format(pomodoroSession.startTime, 'HH:mm')}">開始時間</td>
+                                    <td th:text="${pomodoroSession.endTime != null ? #temporals.format(pomodoroSession.endTime, 'HH:mm') : '-'}">終了時間</td>
+                                    <td>
+                                        <span class="badge"
+                                              th:classappend="${pomodoroSession.completed ? 'bg-success' : 'bg-warning'}"
+                                              th:text="${pomodoroSession.completed ? '完了' : '進行中'}">
+                                            状態
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(todaysSessions)}">
+                                    <td colspan="4" class="text-center text-muted">
+                                        本日のセッションはありません
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

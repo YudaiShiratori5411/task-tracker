@@ -3,18 +3,39 @@
       th:replace="~{layout/base :: html}">
 <body>
     <div th:fragment="content">
-        <div class="pomodoro-container text-center">
-            <div class="task-info mb-4">
-                <h3 th:text="${task.title}">タスク名</h3>
-                <p th:text="${task.description}" class="text-muted">タスクの説明</p>
+        <!-- タスク情報と TaskID の設定 -->
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            const taskId = /*[[${task != null ? task.id : null}]]*/ null;
+            const currentSession = /*[[${pomodoroSession}]]*/ null;  // 変数名変更
+            /*]]>*/
+        </script>
+        <div class="pomodoro-container">
+            <!-- タスク情報表示 -->
+            <div class="task-info mb-4" th:if="${task != null}">
+                <h3 class="task-title" th:text="${task.title}">タスク名</h3>
+                <p class="task-description text-muted" th:text="${task.description}">タスクの説明</p>
+            </div>
+
+            <!-- エラー表示 -->
+            <div class="alert alert-danger" th:if="${task == null}">
+                <i class="fas fa-exclamation-triangle"></i>
+                タスク情報の取得に失敗しました。
+                <a th:href="@{/tasks}" class="alert-link">タスク一覧に戻る</a>
             </div>
             
-            <div class="timer-display">
+            <!-- タイマー表示 -->
+            <div class="timer-container">
                 <div class="timer-circle">
-                    <div class="time" id="timeDisplay">25:00</div>
+                    <div class="timer-progress"></div>
+                    <div class="timer-content">
+                        <div id="timeDisplay">25:00</div>
+                        <div id="timerStatus" class="text-muted">作業時間</div>
+                    </div>
                 </div>
             </div>
             
+            <!-- タイマーコントロール -->
             <div class="timer-controls mt-4">
                 <button id="startButton" class="btn btn-primary btn-lg">
                     <i class="fas fa-play"></i> 開始
@@ -27,35 +48,272 @@
                 </button>
             </div>
             
-            <div class="session-info mt-4">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5>本日の集中セッション</h5>
-                                <h2 th:text="${todaysSessions}">0</h2>
+            <!-- セッション設定 -->
+            <div class="session-settings mt-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-cog"></i> セッション設定
+                        </h5>
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="workDuration">作業時間 (分)</label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="workDuration" 
+                                           name="workDuration"
+                                           value="25" 
+                                           min="1" 
+                                           max="60">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="breakDuration">休憩時間 (分)</label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="breakDuration" 
+                                           name="breakDuration"
+                                           value="5" 
+                                           min="1" 
+                                           max="30">
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5>総集中時間</h5>
-                                <h2 th:text="${totalFocusTime + '分'}">0分</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5>現在のストリーク</h5>
-                                <h2><span id="streak">0</span>日</h2>
+                        
+                        <!-- サウンド設定 -->
+                        <div class="sound-settings mt-3">
+                            <label for="soundSelect">通知音</label>
+                            <select class="form-select" 
+                                    id="soundSelect" 
+                                    name="soundSelect">
+                                <option value="airport-announcement-ding.mp3">空港アナウンス</option>
+                                <option value="JR-Station.mp3">駅アナウンス</option>
+                            </select>
+                            <div class="volume-control mt-2">
+                                <label for="volumeControl">
+                                    音量: <span id="volumeLevel">50</span>%
+                                </label>
+                                <input type="range" 
+                                       class="form-range" 
+                                       id="volumeControl" 
+                                       name="volumeControl"
+                                       min="0" 
+                                       max="100" 
+                                       value="50">
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            
+            <!-- 今日のセッション履歴 -->
+            <div class="session-history mt-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">今日のセッション履歴</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>開始時間</th>
+                                        <th>終了時間</th>
+                                        <th>状態</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sessionHistory">
+                                    <tr th:each="pomodoroSession : ${pomodoroHistory}">  <!-- 変数名変更 -->
+                                        <td th:text="${#temporals.format(pomodoroSession.startTime, 'HH:mm')}">開始時間</td>
+                                        <td th:text="${pomodoroSession.endTime != null ? #temporals.format(pomodoroSession.endTime, 'HH:mm') : '-'}">終了時間</td>
+                                        <td>
+                                            <span class="badge" 
+                                                  th:classappend="${pomodoroSession.completed ? 'bg-success' : 'bg-warning'}"
+                                                  th:text="${pomodoroSession.completed ? '完了' : '中断'}">状態</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- 通知音のプリロード -->
+        <audio id="notificationSound" preload="auto">
+            <source th:src="@{/sound/airport-announcement-ding.mp3}" type="audio/mpeg">
+        </audio>
     </div>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org"-->
+<!--      th:replace="~{layout/base :: html}">-->
+<!--<body>-->
+<!--    <div th:fragment="content">-->
+<!--               タスク情報と TaskID の設定 -->
+<!--        <script th:inline="javascript">-->
+<!--            /*<![CDATA[*/-->
+<!--            const taskId = /*[[${task != null ? task.id : null}]]*/ null;-->
+<!--            /*]]>*/-->
+<!--            const currentSession = /*[[${currentSession}]]*/ null;-->
+<!--        </script>-->
+<!--        <div class="pomodoro-container">-->
+<!--             タスク情報表示 -->
+<!--            <div class="task-info mb-4" th:if="${task != null}">-->
+<!--                <h3 class="task-title" th:text="${task.title}">タスク名</h3>-->
+<!--                <p class="task-description text-muted" th:text="${task.description}">タスクの説明</p>-->
+<!--            </div>-->
+
+<!--             エラー表示 -->
+<!--            <div class="alert alert-danger" th:if="${task == null}">-->
+<!--                <i class="fas fa-exclamation-triangle"></i>-->
+<!--                タスク情報の取得に失敗しました。-->
+<!--                <a th:href="@{/tasks}" class="alert-link">タスク一覧に戻る</a>-->
+<!--            </div>-->
+            
+<!--             タイマー表示 -->
+<!--            <div class="timer-container">-->
+<!--                <div class="timer-circle">-->
+<!--                    <div class="timer-progress"></div>-->
+<!--                    <div class="timer-content">-->
+<!--                        <div id="timeDisplay">25:00</div>-->
+<!--                        <div id="timerStatus" class="text-muted">作業時間</div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+            
+<!--             タイマーコントロール -->
+<!--            <div class="timer-controls mt-4">-->
+<!--                <button id="startButton" class="btn btn-primary btn-lg">-->
+<!--                    <i class="fas fa-play"></i> 開始-->
+<!--                </button>-->
+<!--                <button id="pauseButton" class="btn btn-warning btn-lg" style="display: none;">-->
+<!--                    <i class="fas fa-pause"></i> 一時停止-->
+<!--                </button>-->
+<!--                <button id="resetButton" class="btn btn-secondary btn-lg" disabled>-->
+<!--                    <i class="fas fa-redo"></i> リセット-->
+<!--                </button>-->
+<!--            </div>-->
+            
+<!--             セッション設定 -->
+<!--            <div class="session-settings mt-4">-->
+<!--                <div class="card">-->
+<!--                    <div class="card-body">-->
+<!--                        <h5 class="card-title">-->
+<!--                            <i class="fas fa-cog"></i> セッション設定-->
+<!--                        </h5>-->
+<!--                        <div class="row align-items-center">-->
+<!--                            <div class="col-md-6">-->
+<!--                                <div class="form-group">-->
+<!--                                    <label for="workDuration">作業時間 (分)</label>-->
+<!--                                    <input type="number" -->
+<!--                                           class="form-control" -->
+<!--                                           id="workDuration" -->
+<!--                                           name="workDuration"-->
+<!--                                           value="25" -->
+<!--                                           min="1" -->
+<!--                                           max="60">-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div class="col-md-6">-->
+<!--                                <div class="form-group">-->
+<!--                                    <label for="breakDuration">休憩時間 (分)</label>-->
+<!--                                    <input type="number" -->
+<!--                                           class="form-control" -->
+<!--                                           id="breakDuration" -->
+<!--                                           name="breakDuration"-->
+<!--                                           value="5" -->
+<!--                                           min="1" -->
+<!--                                           max="30">-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+                        
+<!--                         サウンド設定 -->
+<!--                        <div class="sound-settings mt-3">-->
+<!--                            <label for="soundSelect">通知音</label>-->
+<!--                            <select class="form-select" -->
+<!--                                    id="soundSelect" -->
+<!--                                    name="soundSelect">-->
+<!--                                <option value="airport-announcement-ding.mp3">空港アナウンス</option>-->
+<!--                                <option value="JR-Station.mp3">駅アナウンス</option>-->
+<!--                            </select>-->
+<!--                            <div class="volume-control mt-2">-->
+<!--                                <label for="volumeControl">-->
+<!--                                    音量: <span id="volumeLevel">50</span>%-->
+<!--                                </label>-->
+<!--                                <input type="range" -->
+<!--                                       class="form-range" -->
+<!--                                       id="volumeControl" -->
+<!--                                       name="volumeControl"-->
+<!--                                       min="0" -->
+<!--                                       max="100" -->
+<!--                                       value="50">-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+            
+<!--             今日のセッション履歴 -->
+<!--            <div class="session-history mt-4">-->
+<!--                <div class="card">-->
+<!--                    <div class="card-header">-->
+<!--                        <h5 class="mb-0">今日のセッション履歴</h5>-->
+<!--                    </div>-->
+<!--                    <div class="card-body">-->
+<!--                        <div class="table-responsive">-->
+<!--                            <table class="table table-hover">-->
+<!--                                <thead>-->
+<!--                                    <tr>-->
+<!--                                        <th>開始時間</th>-->
+<!--                                        <th>終了時間</th>-->
+<!--                                        <th>状態</th>-->
+<!--                                    </tr>-->
+<!--                                </thead>-->
+<!--                                <tbody id="sessionHistory">-->
+<!--                                    <tr th:each="session : ${todaysSessions}">-->
+<!--                                        <td th:text="${#temporals.format(session.startTime, 'HH:mm')}">開始時間</td>-->
+<!--                                        <td th:text="${session.endTime != null ? #temporals.format(session.endTime, 'HH:mm') : '-'}">終了時間</td>-->
+<!--                                        <td>-->
+<!--                                            <span class="badge" -->
+<!--                                                  th:classappend="${session.completed ? 'bg-success' : 'bg-warning'}"-->
+<!--                                                  th:text="${session.completed ? '完了' : '中断'}">状態</span>-->
+<!--                                        </td>-->
+<!--                                    </tr>-->
+<!--                                </tbody>-->
+<!--                            </table>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--         通知音のプリロード -->
+<!--        <audio id="notificationSound" preload="auto">-->
+<!--            <source th:src="@{/sound/airport-announcement-ding.mp3}" type="audio/mpeg">-->
+<!--        </audio>-->
+<!--    </div>-->
+<!--</body>-->
+<!--</html>-->

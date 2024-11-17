@@ -1,9 +1,7 @@
 package com.example.tasktracker.service.impl;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.tasktracker.mapper.PomodoroMapper;
 import com.example.tasktracker.model.PomodoroSession;
-import com.example.tasktracker.model.PomodoroType;
 import com.example.tasktracker.service.PomodoroService;
 
 @Service
@@ -21,14 +18,17 @@ public class PomodoroServiceImpl implements PomodoroService {
     private PomodoroMapper pomodoroMapper;
     
     @Override
+    public List<PomodoroSession> getTodaysSessions() {
+        return pomodoroMapper.findAllTodaysSessions();
+    }
+    
+    @Override
     @Transactional
     public PomodoroSession startSession(Long taskId) {
         PomodoroSession session = new PomodoroSession();
         session.setTaskId(taskId);
         session.setStartTime(LocalDateTime.now());
         session.setCompleted(false);
-        session.setType(PomodoroType.WORK);
-        
         pomodoroMapper.insert(session);
         return session;
     }
@@ -60,11 +60,23 @@ public class PomodoroServiceImpl implements PomodoroService {
         return pomodoroMapper.findTodaysSessions(taskId);
     }
     
+//    @Override
+//    public List<PomodoroSession> getTodaysSessions() {
+//        return pomodoroMapper.findAllTodaysSessions();
+//    }
+    
     @Override
-    public Map<String, Object> getTodaysSummary() {
-        Map<String, Object> summary = new HashMap<>();
-        summary.put("todaysSessions", pomodoroMapper.countTodaysCompletedSessions());
-        summary.put("totalFocusTime", pomodoroMapper.calculateTodaysTotalFocusTime());
-        return summary;
+    public int getTodaysTotalFocusTime() {
+        return pomodoroMapper.calculateTodaysTotalFocusTime();
+    }
+    
+    @Override
+    public int countTodaysCompletedSessions() {
+        return pomodoroMapper.countTodaysCompletedSessions();
+    }
+    
+    @Override
+    public PomodoroSession getCurrentSession(Long taskId) {
+        return pomodoroMapper.findCurrentSession(taskId);
     }
 }
