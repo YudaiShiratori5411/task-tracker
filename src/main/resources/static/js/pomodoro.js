@@ -4,18 +4,33 @@ class PomodoroTimer {
         this.taskId = taskId;
 
         // 基本設定
-        this.workDuration = 25 * 60; // 25分をデフォルトに
-        this.breakDuration = 5 * 60; // 5分をデフォルトに
+        this.workDuration = 25 * 60;
+        this.breakDuration = 5 * 60;
         this.timeLeft = this.workDuration;
         this.isRunning = false;
         this.isBreak = false;
         this.currentSessionId = null;
-
+        
+        this.restoreState();
         // 初期化処理
         this.initializeElements();
         this.loadSettings();
         this.requestNotificationPermission();
         this.updateDisplay(); // 初期表示の更新
+        
+        // 保存された状態の復元を試みる
+        const restored = this.restoreState();
+        if (restored) {
+            console.log('State restored successfully');
+            this.updateDisplay(); // 復元した状態を表示に反映
+            if (this.isRunning) {
+                this.start(); // タイマーが実行中だった場合は再開
+            }
+        }
+        
+        // 自動保存の設定
+        this.setupAutoSave();
+        this.setupBeforeUnloadHandler();
     }
 
     initializeElements() {
@@ -53,6 +68,8 @@ class PomodoroTimer {
             this.resetButton = document.getElementById('resetButton');
             console.log('resetButton found:', !!this.resetButton);
             if (this.resetButton) {
+                // リセットボタンの初期状態を設定
+                this.resetButton.disabled = this.timeLeft === this.workDuration;
                 this.resetButton.addEventListener('click', () => {
                     console.log('Reset button clicked');
                     this.reset();
@@ -104,6 +121,85 @@ class PomodoroTimer {
         }
 
         console.log('Elements initialization completed');
+    }
+    
+        // 状態の保存
+
+    saveState() {
+        const state = {
+            taskId: this.taskId,
+            timeLeft: this.timeLeft,
+            isBreak: this.isBreak,
+            isRunning: this.isRunning,
+            currentSessionId: this.currentSessionId,
+            lastSaved: new Date().getTime(),
+            workDuration: this.workDuration,
+            breakDuration: this.breakDuration
+        };
+        try {
+            localStorage.setItem(`pomodoroState_${this.taskId}`, JSON.stringify(state));
+            console.log('State saved:', state);
+        } catch (error) {
+            console.error('Error saving state:', error);
+        }
+    }
+
+    restoreState() {
+        try {
+            const savedState = localStorage.getItem(`pomodoroState_${this.taskId}`);
+            console.log('Found saved state:', savedState);
+            
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                const timePassed = Math.floor((new Date().getTime() - state.lastSaved) / 1000);
+                
+                this.isBreak = state.isBreak;
+                this.currentSessionId = state.currentSessionId;
+                this.workDuration = state.workDuration;
+                this.breakDuration = state.breakDuration;
+                this.isRunning = state.isRunning;
+                
+                // 経過時間を考慮して残り時間を計算
+                if (this.isRunning) {
+                    this.timeLeft = Math.max(0, state.timeLeft - timePassed);
+                } else {
+                    this.timeLeft = state.timeLeft;
+                }
+
+                // 状態復元後にリセットボタンの状態を更新
+                if (this.resetButton) {
+                    this.resetButton.disabled = false;
+                }
+                
+                console.log('Restored state:', {
+                    timeLeft: this.timeLeft,
+                    isBreak: this.isBreak,
+                    isRunning: this.isRunning,
+                    timePassed
+                });
+                
+                return true;
+            }
+        } catch (error) {
+            console.error('Error restoring state:', error);
+        }
+        return false;
+    }
+    
+        // 定期的な状態の保存を設定
+    setupAutoSave() {
+        // 定期的な状態保存
+        setInterval(() => {
+            if (this.timeLeft > 0) {
+                this.saveState();
+            }
+        }, 1000);
+    }
+
+    setupBeforeUnloadHandler() {
+        window.addEventListener('beforeunload', () => {
+            this.saveState();
+        });
     }
 
     async requestNotificationPermission() {
@@ -178,41 +274,72 @@ class PomodoroTimer {
         localStorage.setItem('volume', volume);
     }
 
-    async start() {
+    // タイマー開始処理の更新
+    start() {
+        console.log('Starting timer');
         if (!this.isRunning) {
             this.isRunning = true;
-            this.startButton.style.display = 'none';
-            this.pauseButton.style.display = 'inline-block';
-            this.resetButton.disabled = false;
+            if (this.startButton) this.startButton.style.display = 'none';
+            if (this.pauseButton) this.pauseButton.style.display = 'inline-block';
+            if (this.resetButton) this.resetButton.disabled = false;
             
-            if (!this.isBreak) {
-                await this.startNewSession();
+            if (!this.isBreak && !this.currentSessionId) {
+                this.startNewSession();
             }
             
-            this.timer = setInterval(() => this.tick(), 1000);
-            this.timerCircle.classList.add('active');
+            this.timer = setInterval(() => {
+                this.tick();
+                this.saveState();
+            }, 1000);
+            
+            if (this.timerCircle) {
+                this.timerCircle.classList.add('active');
+            }
         }
     }
 
+    // 一時停止処理の更新
     pause() {
+        console.log('Pausing timer');
         if (this.isRunning) {
             this.isRunning = false;
-            this.startButton.style.display = 'inline-block';
-            this.pauseButton.style.display = 'none';
+            if (this.startButton) this.startButton.style.display = 'inline-block';
+            if (this.pauseButton) this.pauseButton.style.display = 'none';
             clearInterval(this.timer);
-            this.timerCircle.classList.remove('active');
+            if (this.timerCircle) {
+                this.timerCircle.classList.remove('active');
+            }
+            this.saveState();
         }
     }
 
     reset() {
-        this.pause();
+        console.log('Resetting timer');
+        // タイマーが実行中なら停止
+        if (this.isRunning) {
+            this.pause();
+        }
+
+        // タイマーをリセット
         this.timeLeft = this.isBreak ? this.breakDuration : this.workDuration;
         this.updateDisplay();
-        this.resetButton.disabled = true;
         
+        // セッション関連の処理
         if (!this.isBreak && this.currentSessionId) {
             this.interruptSession();
         }
+
+        // 状態をリセット
+        this.isRunning = false;
+        if (this.startButton) this.startButton.style.display = 'inline-block';
+        if (this.pauseButton) this.pauseButton.style.display = 'none';
+        if (this.resetButton) this.resetButton.disabled = true;
+        if (this.timerCircle) this.timerCircle.classList.remove('active');
+
+        // 保存された状態をクリア
+        localStorage.removeItem(`pomodoroState_${this.taskId}`);
+        
+        console.log('Timer reset complete');
     }
 
     tick() {
@@ -224,38 +351,48 @@ class PomodoroTimer {
         }
     }
 
+
     updateDisplay() {
-        // 時間表示の更新
-        const minutes = Math.floor(this.timeLeft / 60);
-        const seconds = this.timeLeft % 60;
-        this.timeDisplay.textContent = 
-            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        
-        // ステータス表示の更新
-        this.timerStatus.textContent = this.isBreak ? '休憩時間' : '作業時間';
-        
-        // プログレスバーの更新
-        const totalTime = this.isBreak ? this.breakDuration : this.workDuration;
-        const progress = ((totalTime - this.timeLeft) / totalTime) * 100;
-        this.timerCircle.style.background = 
-            `conic-gradient(#28a745 ${progress}%, #e9ecef ${progress}%)`;
-        
-        // タブタイトルの更新
-        document.title = `(${this.timeDisplay.textContent}) ${this.timerStatus.textContent} - Pomodoro`;
+        if (this.timeDisplay) {
+            const minutes = Math.floor(this.timeLeft / 60);
+            const seconds = this.timeLeft % 60;
+            this.timeDisplay.textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (this.timerStatus) {
+                this.timerStatus.textContent = this.isBreak ? '休憩時間' : '作業時間';
+            }
+
+            // プログレスバーの更新
+            if (this.timerCircle) {
+                const totalTime = this.isBreak ? this.breakDuration : this.workDuration;
+                const progress = ((totalTime - this.timeLeft) / totalTime) * 100;
+                this.timerCircle.style.background = 
+                    `conic-gradient(#28a745 ${progress}%, #e9ecef ${progress}%)`;
+            }
+
+            // リセットボタンの状態を更新
+            if (this.resetButton) {
+                const isDefaultState = this.timeLeft === (this.isBreak ? this.breakDuration : this.workDuration);
+                this.resetButton.disabled = isDefaultState;
+            }
+
+            document.title = `(${this.timeDisplay.textContent}) ${this.timerStatus.textContent} - Pomodoro`;
+        }
     }
 
+    // セッション完了処理の更新
     async completeInterval() {
         this.pause();
         this.playNotification();
         
         if (!this.isBreak) {
-            // 作業セッション完了
             await this.completeSession();
             this.showNotification('作業セッション完了！', '休憩時間です');
             this.isBreak = true;
             this.timeLeft = this.breakDuration;
+            this.currentSessionId = null;
         } else {
-            // 休憩セッション完了
             this.showNotification('休憩時間終了！', '新しいセッションを開始しましょう');
             this.isBreak = false;
             this.timeLeft = this.workDuration;
@@ -263,7 +400,14 @@ class PomodoroTimer {
         
         this.updateDisplay();
         this.resetButton.disabled = true;
-        this.currentSessionId = null;
+        this.saveState();
+    }
+
+    // ページを離れる前の処理
+    handleBeforeUnload() {
+        if (this.isRunning) {
+            this.saveState();
+        }
     }
 
     async startNewSession() {
@@ -401,11 +545,9 @@ class PomodoroTimer {
 }
 
 // タイマーのインスタンス化
-// インスタンス化部分も修正
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM Content Loaded');
+    console.log('DOM Content Loaded, taskId:', taskId);
     if (typeof taskId !== 'undefined' && taskId !== null) {
-        console.log('Creating PomodoroTimer instance with taskId:', taskId);
         window.pomodoroTimer = new PomodoroTimer(taskId);
     } else {
         console.error('TaskId is not defined');
