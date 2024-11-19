@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const deadlineInput = document.getElementById('deadline');
     if (deadlineInput && !deadlineInput.value) {
         const defaultDate = new Date();
-        defaultDate.setDate(defaultDate.getDate() + 7); // 1週間後をデフォルトに
+        defaultDate.setDate(defaultDate.getDate() + 7);
         const formattedDate = defaultDate.toISOString().slice(0, 16);
         deadlineInput.value = formattedDate;
     }

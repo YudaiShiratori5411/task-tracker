@@ -12,11 +12,10 @@ class PomodoroTimer {
         this.currentSessionId = null;
         
         this.restoreState();
-        // 初期化処理
         this.initializeElements();
         this.loadSettings();
         this.requestNotificationPermission();
-        this.updateDisplay(); // 初期表示の更新
+        this.updateDisplay();
         
         // 保存された状態の復元を試みる
         const restored = this.restoreState();

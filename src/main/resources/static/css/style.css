@@ -383,7 +383,7 @@
 
 /* 優先度ごとのアイコン色調整 */
 .priority-HIGH i {
-    color: white;
+    color: #000;
 }
 
 .priority-MEDIUM i {
@@ -391,7 +391,7 @@
 }
 
 .priority-LOW i {
-    color: white;
+    color: #000;
 }
 
 /* ドロップダウンメニューの優先度アイコン */
@@ -569,20 +569,6 @@
 .empty-message {
     transition: display 0.3s ease;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

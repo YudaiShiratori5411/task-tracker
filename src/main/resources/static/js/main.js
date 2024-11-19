@@ -37,7 +37,7 @@ function initializeDragAndDrop() {
     
     taskLists.forEach(taskList => {
         new Sortable(taskList, {
-            group: 'tasks',  // これにより、異なるリスト間でドラッグ可能になります
+            group: 'tasks',  // 異なるリスト間でドラッグ可能になる
             animation: 150,  // ドラッグアニメーションの時間（ミリ秒）
             ghostClass: 'task-ghost',  // ドラッグ中のプレースホルダーのクラス
             dragClass: 'task-dragging',  // ドラッグ中のアイテムのクラス
