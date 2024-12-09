@@ -411,27 +411,25 @@ class PomodoroTimer {
 
     async startNewSession() {
         try {
-            const response = await fetch(`/pomodoro/${this.taskId}/start`, {
+            console.log('Starting new session for taskId:', taskId); // デバッグ用
+            const response = await fetch(`/pomodoro/task/${taskId}/start`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // CSRFトークンがある場合は追加
-                    ...(document.querySelector('meta[name="_csrf"]') && {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
-                    })
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content 
                 }
             });
+            
+            console.log('Response:', response); // デバッグ用
             
             if (response.ok) {
                 const data = await response.json();
                 this.currentSessionId = data.id;
-                console.log('セッション開始:', this.currentSessionId); // デバッグ用
-            } else {
-                throw new Error('セッション開始に失敗しました');
+                console.log('Session started:', data); // デバッグ用
             }
         } catch (error) {
-            console.error('セッション開始エラー:', error);
-            this.showToast('セッションの開始に失敗しました', 'danger');
+            console.error('Session start error:', error);
+            showToast('セッションの開始に失敗しました', 'danger');
         }
     }
 
@@ -475,9 +473,12 @@ class PomodoroTimer {
     async completeSession() {
         if (this.currentSessionId) {
             try {
-                await fetch(`/pomodoro/${this.currentSessionId}/complete`, {
-                    method: 'POST'
-                });
+            await fetch(`/pomodoro/task/${this.currentSessionId}/complete`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
+                }
+            });
                 this.updateSessionHistory();
             } catch (error) {
                 console.error('セッション完了エラー:', error);
@@ -515,7 +516,7 @@ class PomodoroTimer {
 
     async updateSessionHistory() {
         try {
-            const response = await fetch(`/pomodoro/${taskId}/sessions`);
+            const response = await fetch(`/pomodoro/task/${taskId}/sessions`);
             const sessions = await response.json();
             // セッション履歴のUIを更新
             const historyBody = document.getElementById('sessionHistory');

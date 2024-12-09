@@ -1,13 +1,12 @@
 package com.example.tasktracker.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +24,7 @@ import com.example.tasktracker.service.TaskService;
 @RequestMapping("/pomodoro")
 public class PomodoroController {
     
-    private static final Logger logger = LoggerFactory.getLogger(PomodoroController.class);
+	private static final Logger logger = LoggerFactory.getLogger(PomodoroController.class);
     
     @Autowired
     private TaskService taskService;
@@ -38,19 +37,19 @@ public class PomodoroController {
     public String showSummary(Model model) {
         try {
             logger.info("Showing pomodoro summary");
+            List<PomodoroSession> todaysSessions = pomodoroService.getTodaysSessions();
             
-            model.addAttribute("todaysSessions", pomodoroService.getTodaysSessions());
-            model.addAttribute("totalFocusTime", pomodoroService.getTodaysTotalFocusTime());
-            model.addAttribute("completedSessions", pomodoroService.countTodaysCompletedSessions());
-            
-            // 統計情報の追加
             Map<String, Object> stats = new HashMap<>();
-            stats.put("totalSessions", pomodoroService.countTodaysCompletedSessions());
-            stats.put("totalTime", pomodoroService.getTodaysTotalFocusTime());
-            stats.put("averageSessionTime", calculateAverageSessionTime());
+            int completedSessions = pomodoroService.countTodaysCompletedSessions();
+            int totalTime = pomodoroService.getTodaysTotalFocusTime();
             
+            stats.put("totalSessions", completedSessions);
+            stats.put("totalTime", totalTime);
+            stats.put("averageSessionTime", completedSessions > 0 ? (double)totalTime / completedSessions : 0.0);
+
+            model.addAttribute("todaysSessions", todaysSessions);
             model.addAttribute("stats", stats);
-            
+
             return "pomodoro/summary";
         } catch (Exception e) {
             logger.error("Error showing summary", e);
@@ -84,23 +83,34 @@ public class PomodoroController {
         }
     }
 
-    @PostMapping("/task/{taskId}/start")  // パスを変更
+    @PostMapping("/task/{taskId}/start")
     @ResponseBody
-    public ResponseEntity<PomodoroSession> startSession(@PathVariable Long taskId) {
-        try {
-            PomodoroSession pomodoroSession = pomodoroService.startSession(taskId);
-            return ResponseEntity.ok(pomodoroSession);
-        } catch (Exception e) {
-            logger.error("Error starting session for task ID: " + taskId, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public PomodoroSession startSession(@PathVariable Long taskId) {
+        return pomodoroService.startSession(taskId);
     }
-
-    private double calculateAverageSessionTime() {
-        int totalSessions = pomodoroService.countTodaysCompletedSessions();
-        if (totalSessions == 0) return 0;
-        return (double) pomodoroService.getTodaysTotalFocusTime() / totalSessions;
+    
+    @PostMapping("/task/{sessionId}/complete")
+    @ResponseBody
+    public void completeSession(@PathVariable Long sessionId) {
+        pomodoroService.completeSession(sessionId);
     }
+    
+    @GetMapping("/task/{taskId}/sessions")
+    @ResponseBody
+    public List<PomodoroSession> getTaskSessions(@PathVariable Long taskId) {
+        return pomodoroService.getTodaysSessions(taskId);
+    }
+    
+    @GetMapping("/stats")
+    @ResponseBody
+    public Map<String, Object> calculateAverageSessionTime() {
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("completedSessions", pomodoroService.countTodaysCompletedSessions());
+        stats.put("totalFocusTime", pomodoroService.getTodaysTotalFocusTime());
+        
+        return stats;
+    }
+    
 }
 
 
